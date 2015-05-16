@@ -1,6 +1,6 @@
-# Commons Compress encoder plugin for Embulk
+# Commons Compress Encoder plugin for Embulk
 
-TODO: Write short description here
+This encoder plugin supports to encode a format like bzip2 and gzip.
 
 ## Overview
 
@@ -10,18 +10,20 @@ TODO: Write short description here
 
 ## Configuration
 
-- **property1**: description (string, required)
-- **property2**: description (integer, default: default-value)
+- **format**: File format like bzip2, gzip (string, required)
 
 ## Example
 
 ```yaml
 out:
-  type: any output input plugin type
+  type: file
+  path_prefix: any path
+  file_ext: .csv.bz2
+  formatter:
+    type: csv
   encoders:
-    - type: commons-compress
-      property1: example1
-      property2: example2
+  - type: commons-compress
+    format: bzip2
 ```
 
 ## Build
