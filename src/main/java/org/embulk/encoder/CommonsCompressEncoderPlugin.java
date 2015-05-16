@@ -19,7 +19,7 @@ public class CommonsCompressEncoderPlugin
         public String getFormat();
         
         @Config("prefix")
-        @ConfigDefault("\"entry-\"")
+        @ConfigDefault("\"result.%1$03d.%1$03d\"")
         public String getPrefix();
 
         @ConfigInject

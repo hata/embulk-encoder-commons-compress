@@ -108,7 +108,7 @@ class CommonsCompressArchiveProvider implements OutputStreamFileOutput.Provider 
     
     ArchiveEntry createEntry(long size) throws IOException {
         // TODO: How to set entry name and indexes.
-        String name =  String.format(entryNamePrefix + ".%d.%d", baseNum, count++);
+        String name =  String.format(entryNamePrefix, baseNum, count++);
 
         switch (format) {
         case CPIO:
