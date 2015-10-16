@@ -44,12 +44,12 @@ task gemspec << { file("build/gemspec").write($/
 Gem::Specification.new do |spec|
   spec.name          = "${project.name}"
   spec.version       = "${project.version}"
-  spec.authors       = ["Hiroki Ata"]
+  spec.authors       = ["hata"]
   spec.summary       = %[Commons Compress encoder plugin for Embulk]
   spec.description   = %[Commons Compress encoder plugin is an Embulk plugin that encodes files using Commons Compress so that any file output plugins can store the files. Search the file output plugins by 'embulk-output file' keywords.]
   spec.email         = ["hiroki.ata@gmail.com"]
   spec.licenses      = ["MIT"]
-  # TODO: spec.homepage      = "https://github.com/hiroki.ata/embulk-encoder-commons-compress"
+  spec.homepage      = "https://github.com/hata/embulk-encoder-commons-compress"
 
   spec.files         = `git ls-files`.split("\n") + Dir["classpath/*.jar"]
   spec.test_files    = spec.files.grep(%r"^(test|spec)/")
