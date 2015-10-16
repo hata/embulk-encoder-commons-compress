@@ -18,7 +18,7 @@ This encoder plugin supports to encode a format like bzip2 and gzip.
 out:
   type: file
   path_prefix: any path
-  file_ext: .csv.bz2
+  file_ext: csv.bz2
   formatter:
     type: csv
   encoders:
