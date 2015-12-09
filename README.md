@@ -1,4 +1,5 @@
 # Commons Compress Encoder plugin for Embulk
+[![Build Status](https://travis-ci.org/hata/embulk-encoder-commons-compress.svg)](https://travis-ci.org/hata/embulk-encoder-commons-compress)
 
 This encoder plugin supports to encode a format like bzip2 and gzip.
 
@@ -10,7 +11,7 @@ This encoder plugin supports to encode a format like bzip2 and gzip.
 
 ## Configuration
 
-- **format**: File format like bzip2, gzip (string, required)
+- **format**: File format like bzip2 and gzip (string, required)
 
 ## Example
 
@@ -31,3 +32,9 @@ out:
 ```
 $ ./gradlew gem
 ```
+
+To run integrationTest
+```
+$ ./gradlew -DenableIntegrationTest=true gem
+```
+
