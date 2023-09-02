@@ -5,7 +5,7 @@ plugins {
 }
 import com.github.jrubygradle.JRubyExec
 
-apply from: 'https://raw.githubusercontent.com/hata/gradle-plugins/master/embulk-integration-test.gradle'
+apply from: 'embulk-integration-test.gradle'
 
 sourceCompatibility = '1.7'
 targetCompatibility = '1.7'

@@ -1,0 +1,67 @@
+// This file is made to based on  https://raw.githubusercontent.com/hata/gradle-plugins/master/embulk-integration-test.gradle.
+// The latest embulk version (>= 0.11.0) can't execute the based script, so the previous stable version (0.9.25) is used.
+
+
+apply from: 'https://raw.github.com/brunodecarvalho/gradle-plugins/master/integration-test.gradle'
+
+// TODO: Can I override these properties ?
+def embulkDownloadURL = "https://dl.embulk.org/embulk-0.9.25.jar"
+def embulkExecPath = ''
+def enableIntegrationTestFlag = Boolean.getBoolean('enableIntegrationTest')
+def embulkIntegrationTestDir = 'embulk.integrationtest.dir'
+
+task downloadEmbulk {
+  embulkExecPath = "$temporaryDir/embulk/bin/embulk0.9.25"
+
+  doFirst {
+    if (!enableIntegrationTestFlag) {
+      throw new StopExecutionException('Skip downloadEmbulk task.')
+    }
+  }
+
+  outputs.upToDateWhen {
+    new File(embulkExecPath).exists()
+  }
+
+  doLast {
+    exec {
+      executable "sh"
+      args "-c", "curl --create-dirs -o $embulkExecPath -L $embulkDownloadURL"
+    }
+    exec {
+      executable "sh"
+      args "-c", "chmod +x $embulkExecPath"
+    }
+  }
+}
+
+
+integrationTest.doFirst {
+  String libDir = file('lib').absolutePath
+  String baseDir = "$temporaryDir/embulk"
+  systemProperty "$embulkIntegrationTestDir", "$baseDir"
+
+  if (!enableIntegrationTestFlag) {
+    throw new StopExecutionException('Skip integrationTest task.')
+  }
+
+  copy {
+    from 'src/integration-test/resources'
+    into baseDir
+  }
+
+  fileTree(dir: "$baseDir", include: "*.yml").visit { config ->
+    ['preview', 'run'].each { embulkCommand ->
+      String logFile = "${config.file.absolutePath}.${embulkCommand}.log"
+      delete logFile
+
+      exec {
+        workingDir baseDir
+        executable "sh"
+        args "-c", "$embulkExecPath $embulkCommand -I $libDir $config.file.absolutePath --log $logFile"
+      }
+    }
+  }
+}
+
+project.tasks.integrationTest.dependsOn(downloadEmbulk)
