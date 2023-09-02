@@ -1,71 +1,52 @@
 plugins {
-    id "com.jfrog.bintray" version "1.1"
-    id "com.github.jruby-gradle.base" version "0.1.5"
     id "java"
+    id "maven-publish"
+    id "org.embulk.embulk-plugins" version "0.4.2"  // 2021-07-15 時点の最新が 0.4.2
 }
-import com.github.jrubygradle.JRubyExec
 
-apply from: 'embulk-integration-test.gradle'
+// apply from: 'embulk-integration-test.gradle'
 
-sourceCompatibility = '1.7'
-targetCompatibility = '1.7'
+sourceCompatibility = '1.8'
+targetCompatibility = '1.8'
 
 repositories {
     mavenCentral()
-    jcenter()
-}
-configurations {
-    provided
 }
 
 version = "0.1.1"
 
 dependencies {
-    compile  "org.embulk:embulk-core:0.8.0"
-    compile "org.apache.commons:commons-compress:1.13"
-    provided "org.embulk:embulk-core:0.8.0"
-    // compile "YOUR_JAR_DEPENDENCY_GROUP:YOUR_JAR_DEPENDENCY_MODULE:YOUR_JAR_DEPENDENCY_VERSION"
+    compileOnly "org.embulk:embulk-api:0.10.31"
+    compileOnly "org.embulk:embulk-spi:0.10.31"
+    compile "org.apache.commons:commons-compress:1.22"
+    compile "org.embulk:embulk-util-file:0.1.3"
+    compile "org.embulk:embulk-util-config:0.3.1"
+
     testCompile "org.jmockit:jmockit:1.15"
     testCompile "junit:junit:4.+"
+    testCompile "org.embulk:embulk-core:0.10.31"
+    testCompile  "org.embulk:embulk-core:0.10.31:tests"
+    testCompile "org.embulk:embulk-deps:0.10.31"
 }
 
-task classpath(type: Copy, dependsOn: ["jar"]) {
-    doFirst { file("classpath").deleteDir() }
-    from (configurations.runtime - configurations.provided + files(jar.archivePath))
-    into "classpath"
-}
-clean { delete 'classpath' }
-
-task gem(type: JRubyExec, dependsOn: ["build", "gemspec", "classpath"]) {
-    jrubyArgs "-rrubygems/gem_runner", "-eGem::GemRunner.new.run(ARGV)", "build"
-    script "build/gemspec"
-    doLast { ant.move(file: "${project.name}-${project.version}.gem", todir: "pkg") }
+embulkPlugin {
+    mainClass = "org.embulk.encoder.CommonsCompressEncoderPlugin"
+    category = "encoder"
+    type = "commons-compress"
 }
 
-task gemspec << { file("build/gemspec").write($/
-Gem::Specification.new do |spec|
-  spec.name          = "${project.name}"
-  spec.version       = "${project.version}"
-  spec.authors       = ["hata"]
-  spec.summary       = %[Commons Compress encoder plugin for Embulk]
-  spec.description   = %[Commons Compress encoder plugin is an Embulk plugin that encodes files using Commons Compress so that any file output plugins can store the files. Search the file output plugins by 'embulk-output file' keywords.]
-  spec.email         = ["hiroki.ata@gmail.com"]
-  spec.licenses      = ["MIT"]
-  spec.homepage      = "https://github.com/hata/embulk-encoder-commons-compress"
 
-  spec.files         = `git ls-files`.split("\n") + Dir["classpath/*.jar"]
-  spec.test_files    = spec.files.grep(%r"^(test|spec)/")
-  spec.require_paths = ["lib"]
-
-  #spec.add_dependency 'YOUR_GEM_DEPENDENCY', ['~> YOUR_GEM_DEPENDENCY_VERSION']
-  spec.add_development_dependency 'bundler', ['~> 1.0']
-  spec.add_development_dependency 'rake', ['>= 10.0']
-end
-/$)
+gem {
+    authors = [ "hata" ]
+    email = ["hiroki.ata@gmail.com"]
+    summary = "Commons Compress encoder plugin for Embulk"
+    description = "Commons Compress encoder plugin is an Embulk plugin that encodes files using Commons Compress so that any file output plugins can store the files. Search the file output plugins by 'embulk-output file' keywords."
+    homepage = "https://github.com/hata/embulk-encoder-commons-compress"
+    licenses = ["MIT"]
 }
 
 //
 // To enable integrationTest, run like this:
 // ./gradlew -DenableIntegrationTest=true gem
 //
-project.tasks.integrationTest.dependsOn(classpath)
+//project.tasks.integrationTest.dependsOn(classpath)

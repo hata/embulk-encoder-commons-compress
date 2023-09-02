@@ -69,20 +69,19 @@ public class TestCommonsCompressCompressorProvider {
     public void testCommonsCompressCompressorProvider() {
         new NonStrictExpectations() {{
             task.getFormat(); result = "gzip";
-            task.getBufferAllocator(); result = new MockBufferAllocator();
         }};
 
-        assertNotNull("Check constructor.", new CommonsCompressCompressorProvider(task, fileOutput));
+        assertNotNull("Check constructor.", new CommonsCompressCompressorProvider(task, fileOutput, new MockBufferAllocator()
+        ));
     }
 
     @Test
     public void testOpenNext() throws Exception {
         new NonStrictExpectations() {{
             task.getFormat(); result = "gzip";
-            task.getBufferAllocator(); result = new MockBufferAllocator();
         }};
 
-        provider = new CommonsCompressCompressorProvider(task, fileOutput);
+        provider = new CommonsCompressCompressorProvider(task, fileOutput, new MockBufferAllocator());
         OutputStream out = provider.openNext();
         assertTrue("Verify a stream instance.", out instanceof GzipCompressorOutputStream);
         provider.close();
@@ -96,10 +95,9 @@ public class TestCommonsCompressCompressorProvider {
     public void testFinish() throws Exception {
         new NonStrictExpectations() {{
             task.getFormat(); result = "gzip";
-            task.getBufferAllocator(); result = new MockBufferAllocator();
         }};
 
-        provider = new CommonsCompressCompressorProvider(task, fileOutput);
+        provider = new CommonsCompressCompressorProvider(task, fileOutput, new MockBufferAllocator());
         provider.finish();
         provider.close();
         
@@ -112,10 +110,9 @@ public class TestCommonsCompressCompressorProvider {
     public void testClose() throws Exception {
         new NonStrictExpectations() {{
             task.getFormat(); result = "gzip";
-            task.getBufferAllocator(); result = new MockBufferAllocator();
         }};
 
-        provider = new CommonsCompressCompressorProvider(task, fileOutput);
+        provider = new CommonsCompressCompressorProvider(task, fileOutput, new MockBufferAllocator());
         provider.close();
         
         new Verifications() {{
@@ -127,10 +124,9 @@ public class TestCommonsCompressCompressorProvider {
     public void testCreateCompressorOutputStreamGzip() throws Exception {
         new NonStrictExpectations() {{
             task.getFormat(); result = "gzip";
-            task.getBufferAllocator(); result = new MockBufferAllocator();
         }};
 
-        provider = new CommonsCompressCompressorProvider(task, fileOutput);
+        provider = new CommonsCompressCompressorProvider(task, fileOutput, new MockBufferAllocator());
         OutputStream out = provider.createCompressorOutputStream();
         assertTrue("Verify a stream instance.", out instanceof GzipCompressorOutputStream);
         provider.close();
@@ -144,10 +140,9 @@ public class TestCommonsCompressCompressorProvider {
     public void testCreateCompressorOutputStreamBzip2() throws Exception {
         new NonStrictExpectations() {{
             task.getFormat(); result = "bzip2";
-            task.getBufferAllocator(); result = new MockBufferAllocator();
         }};
 
-        provider = new CommonsCompressCompressorProvider(task, fileOutput);
+        provider = new CommonsCompressCompressorProvider(task, fileOutput, new MockBufferAllocator());
         OutputStream out = provider.createCompressorOutputStream();
         assertTrue("Verify a stream instance.", out instanceof BZip2CompressorOutputStream);
         provider.close();
@@ -162,10 +157,9 @@ public class TestCommonsCompressCompressorProvider {
     public void testCreateCompressorOutputStreamDeflate() throws Exception {
         new NonStrictExpectations() {{
             task.getFormat(); result = "deflate";
-            task.getBufferAllocator(); result = new MockBufferAllocator();
         }};
 
-        provider = new CommonsCompressCompressorProvider(task, fileOutput);
+        provider = new CommonsCompressCompressorProvider(task, fileOutput, new MockBufferAllocator());
         OutputStream out = provider.createCompressorOutputStream();
         assertTrue("Verify a stream instance.", out instanceof DeflateCompressorOutputStream);
         provider.close();

@@ -1,10 +1,5 @@
 package org.embulk.encoder;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.util.concurrent.atomic.AtomicInteger;
-
 import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.ArchiveOutputStream;
 import org.apache.commons.compress.archivers.cpio.CpioArchiveEntry;
@@ -16,9 +11,15 @@ import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
 import org.embulk.encoder.CommonsCompressEncoderPlugin.PluginTask;
+import org.embulk.spi.BufferAllocator;
 import org.embulk.spi.FileOutput;
-import org.embulk.spi.util.FileOutputOutputStream;
-import org.embulk.spi.util.OutputStreamFileOutput;
+import org.embulk.util.file.FileOutputOutputStream;
+import org.embulk.util.file.OutputStreamFileOutput;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.concurrent.atomic.AtomicInteger;
 
 class CommonsCompressArchiveProvider implements OutputStreamFileOutput.Provider {
     private enum ArchiveFormat {
@@ -52,10 +53,10 @@ class CommonsCompressArchiveProvider implements OutputStreamFileOutput.Provider 
         }
     }
 
-    CommonsCompressArchiveProvider(PluginTask task, FileOutput fileOutput) {
+    CommonsCompressArchiveProvider(PluginTask task, FileOutput fileOutput, BufferAllocator bufferAllocator) {
         this.format = ArchiveFormat.toArchiveFormat(task.getFormat());
         this.underlyingFileOutput = fileOutput;
-        this.output = new FileOutputOutputStream(fileOutput, task.getBufferAllocator(), FileOutputOutputStream.CloseMode.FLUSH);
+        this.output = new FileOutputOutputStream(fileOutput, bufferAllocator, FileOutputOutputStream.CloseMode.FLUSH);
         this.entryNamePrefix = task.getPrefix();
         this.baseNum = baseNumSeq.incrementAndGet();
     }
