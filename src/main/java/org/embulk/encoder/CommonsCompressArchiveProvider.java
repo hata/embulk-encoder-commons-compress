@@ -76,6 +76,7 @@ class CommonsCompressArchiveProvider implements OutputStreamFileOutput.Provider 
         archiveOut.write(tmpOut.toByteArray());
         archiveOut.closeArchiveEntry();
         archiveOut.finish();
+        output.flush();
         tmpOut = null;
     }
 
