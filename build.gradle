@@ -44,6 +44,10 @@ gem {
     licenses = ["MIT"]
 }
 
+gemPush {
+    host = "https://rubygems.org"
+}
+
 tasks.withType(JavaCompile) {
     options.compilerArgs << "-Xlint:deprecation" << "-Xlint:unchecked"
 }
