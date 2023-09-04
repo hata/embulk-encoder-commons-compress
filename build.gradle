@@ -44,7 +44,10 @@ gem {
     licenses = ["MIT"]
 }
 
-//
+tasks.withType(JavaCompile) {
+    options.compilerArgs << "-Xlint:deprecation" << "-Xlint:unchecked"
+}
+
 // To enable integrationTest, run like this:
 // ./gradlew -DenableIntegrationTest=true gem
 

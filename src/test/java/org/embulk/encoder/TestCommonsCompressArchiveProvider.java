@@ -204,7 +204,7 @@ public class TestCommonsCompressArchiveProvider {
 
         @Override
         public Buffer allocate(int size) {
-            return Buffer.allocate(size);
+            return new BufferImpl(new byte[size], 0, size);
         }
     }
 }

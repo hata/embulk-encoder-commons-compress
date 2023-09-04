@@ -33,6 +33,7 @@ import org.apache.commons.compress.compressors.gzip.GzipCompressorOutputStream;
 import org.embulk.encoder.CommonsCompressEncoderPlugin.PluginTask;
 import org.embulk.spi.Buffer;
 import org.embulk.spi.BufferAllocator;
+import org.embulk.spi.BufferImpl;
 import org.embulk.spi.FileOutput;
 import org.junit.After;
 import org.junit.Before;
@@ -177,7 +178,7 @@ public class TestCommonsCompressCompressorProvider {
 
         @Override
         public Buffer allocate(int size) {
-            return Buffer.allocate(size);
+            return new BufferImpl(new byte[size], 0, size);
         }
     }
 }

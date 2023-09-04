@@ -10,6 +10,7 @@ import org.embulk.EmbulkTestRuntime;
 import org.embulk.config.ConfigSource;
 import org.embulk.config.TaskSource;
 import org.embulk.spi.Buffer;
+import org.embulk.spi.BufferImpl;
 import org.embulk.spi.BufferAllocator;
 import org.embulk.spi.EncoderPlugin;
 import org.embulk.spi.FileOutput;
@@ -81,7 +82,7 @@ public class TestCommonsCompressEncoderPlugin
 
         @Override
         public Buffer allocate(int size) {
-            return Buffer.allocate(size);
+            return new BufferImpl(new byte[size], 0, size);
         }
     }
 
