@@ -92,7 +92,6 @@ class CommonsCompressArchiveProvider implements OutputStreamFileOutput.Provider 
             archiveOut.close();
             archiveOut = null;
         }
-        output.close();
         underlyingFileOutput.close();
     }
 
