@@ -1,8 +1,40 @@
-// This file is made to based on  https://raw.githubusercontent.com/hata/gradle-plugins/master/embulk-integration-test.gradle.
-// The latest embulk version (>= 0.11.0) can't execute the based script, so the previous stable version (0.9.25) is used.
+///// This part is made based on 'https://raw.github.com/brunodecarvalho/gradle-plugins/master/integration-test.gradle'
+///// I changed classesDir (deprecated) to classesDirs.
+
+// Assumes 'java', 'groovy' or 'scala' plugins have been applied before
+
+// Add integration test source sets
+sourceSets {
+  integrationTest { sourceSet ->
+    ["java", "groovy", "scala", "resources"].each {
+      if (!sourceSet.hasProperty(it)) return
+      sourceSet."$it".srcDir file("src/integration-test/${it}")
+    }
+  }
+}
+
+// Setup dependencies for integration testing
+dependencies {
+  integrationTestCompile sourceSets.main.output
+  integrationTestCompile sourceSets.test.output
+  integrationTestCompile configurations.testCompile
+  integrationTestRuntime configurations.testRuntime
+}
+
+// Define integration test task
+task integrationTest(type: Test) {
+  testClassesDirs = sourceSets.integrationTest.output.classesDirs
+  classpath = sourceSets.integrationTest.runtimeClasspath
+}
+
+// Make sure 'check' task calls integration test
+check.dependsOn integrationTest
 
 
-apply from: 'https://raw.github.com/brunodecarvalho/gradle-plugins/master/integration-test.gradle'
+
+///// This part is made based on  https://raw.githubusercontent.com/hata/gradle-plugins/master/embulk-integration-test.gradle.
+///// The latest embulk version (>= 0.11.0) can't execute the original script, so the previous stable version (0.9.25) is used.
+///// TODO: use the latest embulk version
 
 // TODO: Can I override these properties ?
 def embulkDownloadURL = "https://dl.embulk.org/embulk-0.9.25.jar"
@@ -11,16 +43,12 @@ def enableIntegrationTestFlag = Boolean.getBoolean('enableIntegrationTest')
 def embulkIntegrationTestDir = 'embulk.integrationtest.dir'
 
 task downloadEmbulk {
-  embulkExecPath = "$temporaryDir/embulk/bin/embulk0.9.25"
+  embulkExecPath = "$temporaryDir/embulk/bin/embulk"
 
   doFirst {
-    if (!enableIntegrationTestFlag) {
+    if (!enableIntegrationTestFlag || new File(embulkExecPath).exists()) {
       throw new StopExecutionException('Skip downloadEmbulk task.')
     }
-  }
-
-  outputs.upToDateWhen {
-    new File(embulkExecPath).exists()
   }
 
   doLast {
@@ -34,7 +62,6 @@ task downloadEmbulk {
     }
   }
 }
-
 
 integrationTest.doFirst {
   String libDir = file('lib').absolutePath

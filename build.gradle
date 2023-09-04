@@ -4,7 +4,7 @@ plugins {
     id "org.embulk.embulk-plugins" version "0.4.2"  // 2021-07-15 時点の最新が 0.4.2
 }
 
-// apply from: 'embulk-integration-test.gradle'
+apply from: 'embulk-integration-test.gradle'
 
 sourceCompatibility = '1.8'
 targetCompatibility = '1.8'
@@ -35,7 +35,6 @@ embulkPlugin {
     type = "commons-compress"
 }
 
-
 gem {
     authors = [ "hata" ]
     email = ["hiroki.ata@gmail.com"]
@@ -48,5 +47,6 @@ gem {
 //
 // To enable integrationTest, run like this:
 // ./gradlew -DenableIntegrationTest=true gem
-//
-//project.tasks.integrationTest.dependsOn(classpath)
+
+project.tasks.integrationTest.dependsOn(jar)
+gem.dependsOn(check)
