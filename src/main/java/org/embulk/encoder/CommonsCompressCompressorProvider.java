@@ -8,9 +8,11 @@ import org.apache.commons.compress.compressors.bzip2.BZip2CompressorOutputStream
 import org.apache.commons.compress.compressors.deflate.DeflateCompressorOutputStream;
 import org.apache.commons.compress.compressors.gzip.GzipCompressorOutputStream;
 import org.embulk.encoder.CommonsCompressEncoderPlugin.PluginTask;
+import org.embulk.spi.BufferAllocator;
+import org.embulk.spi.Exec;
 import org.embulk.spi.FileOutput;
-import org.embulk.spi.util.FileOutputOutputStream;
-import org.embulk.spi.util.OutputStreamFileOutput;
+import org.embulk.util.file.FileOutputOutputStream;
+import org.embulk.util.file.OutputStreamFileOutput;
 
 
 class CommonsCompressCompressorProvider implements OutputStreamFileOutput.Provider {
@@ -35,10 +37,10 @@ class CommonsCompressCompressorProvider implements OutputStreamFileOutput.Provid
         }
     }
     
-    CommonsCompressCompressorProvider(PluginTask task, FileOutput fileOutput) {
+    CommonsCompressCompressorProvider(PluginTask task, FileOutput fileOutput, BufferAllocator bufferAllocator) {
         this.format = CompressorFormat.toCompressorFormat(task.getFormat());
         this.underlyingFileOutput = fileOutput;
-        this.output = new FileOutputOutputStream(fileOutput, task.getBufferAllocator(), FileOutputOutputStream.CloseMode.FLUSH);
+        this.output = new FileOutputOutputStream(fileOutput, bufferAllocator, FileOutputOutputStream.CloseMode.FLUSH);
     }
 
     @Override

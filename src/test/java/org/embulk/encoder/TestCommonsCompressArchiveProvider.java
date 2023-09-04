@@ -33,9 +33,7 @@ import org.apache.commons.compress.archivers.jar.JarArchiveOutputStream;
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
 import org.embulk.encoder.CommonsCompressEncoderPlugin.PluginTask;
-import org.embulk.spi.Buffer;
-import org.embulk.spi.BufferAllocator;
-import org.embulk.spi.FileOutput;
+import org.embulk.spi.*;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -75,10 +73,9 @@ public class TestCommonsCompressArchiveProvider {
         new NonStrictExpectations() {{
             task.getFormat(); result = "zip";
             task.getPrefix(); result = "prefix";
-            task.getBufferAllocator(); result = new MockBufferAllocator();
         }};
 
-        assertNotNull("Check constructor.", new CommonsCompressArchiveProvider(task, fileOutput));
+        assertNotNull("Check constructor.", new CommonsCompressArchiveProvider(task, fileOutput, new MockBufferAllocator()));
     }
 
     @Test
@@ -86,10 +83,9 @@ public class TestCommonsCompressArchiveProvider {
         new NonStrictExpectations() {{
             task.getFormat(); result = "zip";
             task.getPrefix(); result = "prefix";
-            task.getBufferAllocator(); result = new MockBufferAllocator();
         }};
 
-        provider = new CommonsCompressArchiveProvider(task, fileOutput);
+        provider = new CommonsCompressArchiveProvider(task, fileOutput, new MockBufferAllocator());
         OutputStream out = provider.openNext();
         assertTrue("Verify a stream instance.", out instanceof ByteArrayOutputStream);
         provider.close();
@@ -104,10 +100,9 @@ public class TestCommonsCompressArchiveProvider {
         new NonStrictExpectations() {{
             task.getFormat(); result = "zip";
             task.getPrefix(); result = "prefix";
-            task.getBufferAllocator(); result = new MockBufferAllocator();
         }};
 
-        provider = new CommonsCompressArchiveProvider(task, fileOutput);
+        provider = new CommonsCompressArchiveProvider(task, fileOutput, new MockBufferAllocator());
         provider.finish();
         provider.close();
 
@@ -122,10 +117,9 @@ public class TestCommonsCompressArchiveProvider {
         new NonStrictExpectations() {{
             task.getFormat(); result = "zip";
             task.getPrefix(); result = "prefix";
-            task.getBufferAllocator(); result = new MockBufferAllocator();
         }};
 
-        provider = new CommonsCompressArchiveProvider(task, fileOutput);
+        provider = new CommonsCompressArchiveProvider(task, fileOutput, new MockBufferAllocator());
         provider.close();
         
         new Verifications() {{
@@ -138,10 +132,9 @@ public class TestCommonsCompressArchiveProvider {
         new NonStrictExpectations() {{
             task.getFormat(); result = "cpio";
             task.getPrefix(); result = "prefix";
-            task.getBufferAllocator(); result = new MockBufferAllocator();
         }};
 
-        provider = new CommonsCompressArchiveProvider(task, fileOutput);
+        provider = new CommonsCompressArchiveProvider(task, fileOutput, new MockBufferAllocator());
         OutputStream out = provider.createArchiveOutputStream();
         assertTrue("Verify a stream instance.", out instanceof CpioArchiveOutputStream);
         provider.close();
@@ -156,10 +149,9 @@ public class TestCommonsCompressArchiveProvider {
         new NonStrictExpectations() {{
             task.getFormat(); result = "jar";
             task.getPrefix(); result = "prefix";
-            task.getBufferAllocator(); result = new MockBufferAllocator();
         }};
 
-        provider = new CommonsCompressArchiveProvider(task, fileOutput);
+        provider = new CommonsCompressArchiveProvider(task, fileOutput, new MockBufferAllocator());
         OutputStream out = provider.createArchiveOutputStream();
         assertTrue("Verify a stream instance.", out instanceof JarArchiveOutputStream);
         provider.close();
@@ -174,10 +166,10 @@ public class TestCommonsCompressArchiveProvider {
         new NonStrictExpectations() {{
             task.getFormat(); result = "tar";
             task.getPrefix(); result = "prefix";
-            task.getBufferAllocator(); result = new MockBufferAllocator();
         }};
 
-        provider = new CommonsCompressArchiveProvider(task, fileOutput);
+
+        provider = new CommonsCompressArchiveProvider(task, fileOutput, new MockBufferAllocator());
         OutputStream out = provider.createArchiveOutputStream();
         assertTrue("Verify a stream instance.", out instanceof TarArchiveOutputStream);
         provider.close();
@@ -192,10 +184,9 @@ public class TestCommonsCompressArchiveProvider {
         new NonStrictExpectations() {{
             task.getFormat(); result = "zip";
             task.getPrefix(); result = "prefix";
-            task.getBufferAllocator(); result = new MockBufferAllocator();
         }};
 
-        provider = new CommonsCompressArchiveProvider(task, fileOutput);
+        provider = new CommonsCompressArchiveProvider(task, fileOutput, new MockBufferAllocator());
         OutputStream out = provider.createArchiveOutputStream();
         assertTrue("Verify a stream instance.", out instanceof ZipArchiveOutputStream);
         provider.close();
@@ -212,7 +203,7 @@ public class TestCommonsCompressArchiveProvider {
 
         @Override
         public Buffer allocate(int size) {
-            return Buffer.allocate(size);
+            return new BufferImpl(new byte[size], 0, size);
         }
     }
 }
