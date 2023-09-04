@@ -6,30 +6,32 @@ import mockit.Mocked;
 import mockit.NonStrictExpectations;
 import mockit.Verifications;
 
+import org.embulk.EmbulkTestRuntime;
 import org.embulk.config.ConfigSource;
 import org.embulk.config.TaskSource;
-import org.embulk.encoder.CommonsCompressEncoderPlugin.PluginTask;
+import org.embulk.spi.Buffer;
+import org.embulk.spi.BufferImpl;
+import org.embulk.spi.BufferAllocator;
 import org.embulk.spi.EncoderPlugin;
 import org.embulk.spi.FileOutput;
-import org.embulk.spi.util.OutputStreamFileOutput;
+
+import org.embulk.util.file.OutputStreamFileOutput;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 
 public class TestCommonsCompressEncoderPlugin
 {
+    @Rule
+    public EmbulkTestRuntime runtime;
+
     @Mocked
     CommonsCompressEncoderPlugin.PluginTask task;
 
     @Mocked
     FileOutput output;
-    
-    @Mocked
-    TaskSource taskSource;
 
-    @Mocked
-    ConfigSource config;
-    
     @Mocked
     EncoderPlugin.Control control;
 
@@ -37,7 +39,8 @@ public class TestCommonsCompressEncoderPlugin
 
     @Before
     public void setUp() throws Exception {
-        plugin = new CommonsCompressEncoderPlugin();
+        plugin = new CommonsCompressEncoderPluginForTest();
+        runtime = new EmbulkTestRuntime();
     }
 
     @After
@@ -47,25 +50,17 @@ public class TestCommonsCompressEncoderPlugin
 
     @Test
     public void testTransaction() {
-        new NonStrictExpectations() {{
-            config.loadConfig(PluginTask.class); result = task;
-            task.dump(); result = taskSource;
-        }};
-
+        ConfigSource config = runtime.getExec().newConfigSource().set("format", "zip");
         plugin.transaction(config, control);
         
         new Verifications() {{
-            control.run(taskSource); times = 1;
+            control.run((TaskSource) any); times = 1;
         }};
     }
 
     @Test
     public void testOpen() {
-        new NonStrictExpectations() {{
-            task.getFormat(); result = "gzip";
-            taskSource.loadTask(PluginTask.class); result = task;
-        }};
-
+        TaskSource taskSource = runtime.getExec().newTaskSource().set("Format", "zip").set("Prefix", "test");
         assertNotNull(plugin.open(taskSource, output));
     }
 
@@ -77,5 +72,23 @@ public class TestCommonsCompressEncoderPlugin
 
         OutputStreamFileOutput.Provider provider = plugin.createProvider(task, output);
         assertTrue("Verify a provider instance.", provider instanceof CommonsCompressCompressorProvider);
+    }
+
+    private class MockBufferAllocator implements BufferAllocator {
+        @Override
+        public Buffer allocate() {
+            return allocate(8192);
+        }
+
+        @Override
+        public Buffer allocate(int size) {
+            return new BufferImpl(new byte[size], 0, size);
+        }
+    }
+
+    private class CommonsCompressEncoderPluginForTest extends CommonsCompressEncoderPlugin {
+        BufferAllocator bufferAllocator() {
+            return new MockBufferAllocator();
+        }
     }
 }
