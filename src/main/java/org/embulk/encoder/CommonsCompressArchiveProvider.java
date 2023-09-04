@@ -67,28 +67,23 @@ class CommonsCompressArchiveProvider implements OutputStreamFileOutput.Provider 
         return tmpOut = new ByteArrayOutputStream();
     }
 
-    private void archive() throws IOException {
-        if (tmpOut == null) {
-            return;
-        }
-        archiveOut = createArchiveOutputStream();
-        archiveOut.putArchiveEntry(createEntry(tmpOut.size()));
-        archiveOut.write(tmpOut.toByteArray());
-        archiveOut.closeArchiveEntry();
-        archiveOut.finish();
-        tmpOut = null;
-    }
-
     @Override
     public void finish() throws IOException {
-        archive();
-        underlyingFileOutput.finish();
+        if (tmpOut != null) {
+            archiveOut = createArchiveOutputStream();
+            archiveOut.putArchiveEntry(createEntry(tmpOut.size()));
+            archiveOut.write(tmpOut.toByteArray());
+            archiveOut.closeArchiveEntry();
+            archiveOut.finish();
+            tmpOut = null;
+        }
     }
 
     @Override
     public void close() throws IOException {
-        archive();
-
+        if (tmpOut != null) {
+            finish();
+        }
         if (archiveOut != null) {
             archiveOut.close();
             archiveOut = null;
