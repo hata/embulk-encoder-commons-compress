@@ -33,18 +33,39 @@ check.dependsOn integrationTest
 
 
 ///// This part is made based on  https://raw.githubusercontent.com/hata/gradle-plugins/master/embulk-integration-test.gradle.
-///// The latest embulk version (>= 0.11.0) can't execute the original script, so the previous stable version (0.9.25) is used.
-///// TODO: use the latest embulk version
+//
+// If you would like to override embulkDownloadURL, then define
+// embulkDownloadURL in gradle.properties or other config.
+// And if you use embulk v0.9.x, then change embulkLogPathOption to --log
+// because the option is changed.
+// e.g.
+// embulkDownloadURL=https://dl.embulk.org/embulk-0.9.25.jar
+// embulkLogPathOption=--log
+//
 
-// TODO: Can I override these properties ?
-def embulkDownloadURL = "https://dl.embulk.org/embulk-0.9.25.jar"
+def embulkDownloadURL = 'https://dl.embulk.org/embulk-latest.jar'
+def embulkLogPathOption = '--log-path'
 def embulkExecPath = ''
 def enableIntegrationTestFlag = Boolean.getBoolean('enableIntegrationTest')
 def embulkIntegrationTestDir = 'embulk.integrationtest.dir'
 
-task downloadEmbulk {
-  embulkExecPath = "$temporaryDir/embulk/bin/embulk"
+task initIntegrationTestProperties {
+  if (project.hasProperty('embulkDownloadURL')) {
+    embulkDownloadURL = project.findProperty('embulkDownloadURL')
+  }
+  if (project.hasProperty('embulkLogPathOption')) {
+    embulkLogPathOption = project.findProperty('embulkLogPathOption')
+  }
+  if (project.hasProperty('embulkExecPath')) {
+    embulkExecPath = project.findProperty('embulkExecPath')
+  } else {
+    embulkExecPath = "$temporaryDir/embulk/bin/embulk"
+  }
 
+  println("Set download url ${embulkDownloadURL} and exec path ${embulkExecPath}")
+}
+
+task downloadEmbulk {
   doFirst {
     if (!enableIntegrationTestFlag || new File(embulkExecPath).exists()) {
       throw new StopExecutionException('Skip downloadEmbulk task.')
@@ -52,6 +73,8 @@ task downloadEmbulk {
   }
 
   doLast {
+    println("Try to download embulk from ${embulkDownloadURL} to ${embulkExecPath}")
+
     exec {
       executable "sh"
       args "-c", "curl --create-dirs -o $embulkExecPath -L $embulkDownloadURL"
@@ -82,13 +105,16 @@ integrationTest.doFirst {
       String logFile = "${config.file.absolutePath}.${embulkCommand}.log"
       delete logFile
 
+      println("Run integrationTest for ${config.file.absolutePath}")
+
       exec {
         workingDir baseDir
         executable "sh"
-        args "-c", "$embulkExecPath $embulkCommand -I $libDir $config.file.absolutePath --log $logFile"
+        args "-c", "$embulkExecPath $embulkCommand -I $libDir $config.file.absolutePath $embulkLogPathOption $logFile"
       }
     }
   }
 }
 
+project.tasks.downloadEmbulk.dependsOn(initIntegrationTestProperties)
 project.tasks.integrationTest.dependsOn(downloadEmbulk)
