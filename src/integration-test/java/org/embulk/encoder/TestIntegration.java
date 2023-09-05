@@ -11,6 +11,11 @@ import java.io.InputStreamReader;
 import java.util.zip.CRC32;
 import java.util.zip.Checksum;
 
+import org.apache.commons.compress.archivers.ArchiveEntry;
+import org.apache.commons.compress.archivers.ArchiveException;
+import org.apache.commons.compress.archivers.ArchiveInputStream;
+import org.apache.commons.compress.archivers.ArchiveStreamFactory;
+import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.compressors.CompressorException;
 import org.apache.commons.compress.compressors.CompressorStreamFactory;
 import org.junit.Test;
@@ -38,6 +43,13 @@ public class TestIntegration {
         
     }
 
+    @Test
+    public void testSolidCompressionFormatZip() throws Exception {
+        assertEquals("Verify input and output contents are identical.",
+                getChecksumFromFiles("sample_1.csv"),
+                getChecksumFromArchiveFiles("zip", "result_zip_000.00.csv.zip"));
+    }
+
     private long getChecksumFromFiles(String ... files) throws IOException {
         Checksum cksum = new CRC32();
 
@@ -47,6 +59,22 @@ public class TestIntegration {
             }
         }
         
+        return cksum.getValue();
+    }
+
+    private long getChecksumFromArchiveFiles(String archiveName, String ... files) throws IOException, ArchiveException {
+        Checksum cksum = new CRC32();
+
+        ArchiveStreamFactory factory = new ArchiveStreamFactory();
+
+        for (String srcFile : files) {
+            ArchiveInputStream in = factory.createArchiveInputStream(archiveName, new FileInputStream(getTestFile(srcFile)));
+            while (in.getNextEntry() != null) {
+                try(BufferedReader reader = new BufferedReader(new InputStreamReader(in))) {
+                    getChecksum(cksum, reader);
+                }
+            }
+        }
         return cksum.getValue();
     }
 

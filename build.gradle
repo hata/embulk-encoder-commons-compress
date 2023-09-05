@@ -55,5 +55,13 @@ tasks.withType(JavaCompile) {
 // To enable integrationTest, run like this:
 // ./gradlew -DenableIntegrationTest=true gem
 
-project.tasks.integrationTest.dependsOn(jar)
+// classpath task is for compatibility of integartion-test before embulk v0.10.0.
+task classpath(type: Copy, dependsOn: ["jar"]) {
+    doFirst { file("classpath").deleteDir() }
+    from(configurations.runtime - configurations.compileOnly + files(jar.archivePath))
+    into "classpath"
+}
+clean { delete 'classpath' }
+
+project.tasks.integrationTest.dependsOn(classpath)
 gem.dependsOn(check)
